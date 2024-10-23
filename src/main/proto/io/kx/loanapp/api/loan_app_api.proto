@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+
+service LoanAppService {
+
+  rpc Submit() returns (google.protobuf.Empty) {}
+  rpc Get() returns (LoanAppState) {}
+  rpc Approve() returns (google.protobuf.Empty) {}
+  rpc Decline() returns (google.protobuf.Empty) {}
+}
