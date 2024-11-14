@@ -2,6 +2,7 @@ syntax = "proto3";
 
 import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
+import "io/kx/loanapp/api/loan_app_api.proto";
 
 package io.kx.loanapp.domain;
 
@@ -22,6 +23,7 @@ message LoanAppDomainState {
   LoanAppDomainStatus status = 5;
   string decline_reason = 6;
   google.protobuf.Timestamp last_update_timestamp = 7;
+  string operation_id = 8;
 }
 
 message Submitted {
@@ -30,16 +32,16 @@ message Submitted {
   int64 loan_amount_cents = 3;
   int32 loan_duration_months = 4;
   google.protobuf.Timestamp last_update_timestamp = 5;
-  string loan_app_id = 6;
+  api.CompositeId loan_app_id = 6;
 }
 
 message Approved {
   google.protobuf.Timestamp last_update_timestamp = 1;
-  string loan_app_id = 2;
+  api.CompositeId loan_app_id = 2;
 }
 
 message Declined {
   google.protobuf.Timestamp last_update_timestamp = 1;
-  string loan_app_id = 2;
+  api.CompositeId loan_app_id = 2;
   string reason = 3;
 }

@@ -6,8 +6,6 @@ import io.kx.loanapp.api.LoanAppApi;
 import kalix.javasdk.eventsourcedentity.EventSourcedEntity;
 import kalix.javasdk.eventsourcedentity.EventSourcedEntity.Effect;
 import kalix.javasdk.eventsourcedentity.EventSourcedEntityContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 // This class was initially generated based on the .proto definition by Kalix tooling.
 // This is the implementation for the Event Sourced Entity Service described in your io/kx/loanapp/api/loan_app_api.proto file.
@@ -16,8 +14,6 @@ import org.slf4j.LoggerFactory;
 // or delete it so it is regenerated as needed.
 
 public class LoanAppEntity extends AbstractLoanAppEntity {
-
-  private static Logger logger = LoggerFactory.getLogger(LoanAppEntity.class);
 
   @SuppressWarnings("unused")
   private final String entityId;
@@ -33,38 +29,35 @@ public class LoanAppEntity extends AbstractLoanAppEntity {
 
   @Override
   public Effect<Empty> submit(LoanAppDomain.LoanAppDomainState currentState, LoanAppApi.SubmitCommand submitCommand) {
-    //validation logic
-    logger.info("Handled submit");
-    if(currentState.equals(LoanAppDomain.LoanAppDomainState.getDefaultInstance())) {
-      LoanAppDomain.Submitted submitted = LoanAppDomain.Submitted.newBuilder()
+    if (currentState.equals(LoanAppDomain.LoanAppDomainState.getDefaultInstance())) {
+      // validate submit command
+      //
+      LoanAppDomain.Submitted submittedEvent = LoanAppDomain.Submitted.newBuilder()
               .setClientId(submitCommand.getClientId())
               .setClientMonthlyIncomeCents(submitCommand.getClientMonthlyIncomeCents())
               .setLoanAmountCents(submitCommand.getLoanAmountCents())
               .setLoanDurationMonths(submitCommand.getLoanDurationMonths())
-              .setLastUpdateTimestamp(Timestamps.fromMillis(System.currentTimeMillis()))
               .setLoanAppId(submitCommand.getLoanAppId())
               .build();
 
-      return effects().emitEvent(submitted).thenReply(any -> Empty.getDefaultInstance());
-    } else if(currentState.getStatus() == LoanAppDomain.LoanAppDomainStatus.STATUS_IN_REVIEW) {
+      return effects().emitEvent(submittedEvent).thenReply(any -> Empty.getDefaultInstance());
+    } else if (currentState.getStatus() == LoanAppDomain.LoanAppDomainStatus.STATUS_IN_REVIEW) {
       return effects().reply(Empty.getDefaultInstance());
     } else {
-      return effects().error("Current state is not null, and also not in status review, so something must be wrong, " +
-              "you should not be sending submit request for an existing loan app id");
+      return effects().error("STATUS WRONG"); // effect api converts the result into the
     }
   }
 
   @Override
   public Effect<LoanAppApi.LoanAppState> get(LoanAppDomain.LoanAppDomainState currentState, LoanAppApi.GetCommand getCommand) {
-    LoanAppApi.LoanAppState apiState = LoanAppApi.LoanAppState.newBuilder()
+    LoanAppApi.LoanAppState apiSate = LoanAppApi.LoanAppState.newBuilder()
             .setClientId(currentState.getClientId())
             .setClientMonthlyIncomeCents(currentState.getClientMonthlyIncomeCents())
-            .setLoanAmountCents(currentState.getLoanAmountCents())
+            .setLoanAmountCents(currentState().getLoanAmountCents())
             .setLoanDurationMonths(currentState.getLoanDurationMonths())
-            .setDeclineReason(currentState.getDeclineReason())
             .setStatus(LoanAppApi.LoanAppStatus.forNumber(currentState.getStatus().getNumber()))
             .build();
-    return effects().reply(apiState);
+    return effects().reply(apiSate);
   }
 
   @Override
@@ -85,9 +78,7 @@ public class LoanAppEntity extends AbstractLoanAppEntity {
             .setLoanDurationMonths(submitted.getLoanDurationMonths())
             .setLoanAmountCents(submitted.getLoanAmountCents())
             .setClientMonthlyIncomeCents(submitted.getClientMonthlyIncomeCents())
-            .setLastUpdateTimestamp(submitted.getLastUpdateTimestamp())
             .build();
-
   }
   @Override
   public LoanAppDomain.LoanAppDomainState approved(LoanAppDomain.LoanAppDomainState currentState, LoanAppDomain.Approved approved) {

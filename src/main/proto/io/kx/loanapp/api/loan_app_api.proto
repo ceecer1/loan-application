@@ -23,10 +23,16 @@ message LoanAppState {
   LoanAppStatus status = 5;
   string decline_reason = 6;
   google.protobuf.Timestamp last_update_timestamp = 7;
+  string operation_id = 8;
+}
+
+message CompositeId {
+  string comp_id_part1 = 1 [(kalix.field).id = true];
+  string comp_id_part2 = 2 [(kalix.field).id = true];
 }
 
 message SubmitCommand {
-  string loan_app_id = 1 [(kalix.field).id = true];
+  CompositeId loan_app_id = 1 [(kalix.field).id = true];
   string client_id = 2;
   int64 client_monthly_income_cents = 3;
   int64 loan_amount_cents = 4;
@@ -34,15 +40,16 @@ message SubmitCommand {
 }
 
 message GetCommand {
-  string loan_app_id = 1 [(kalix.field).id = true];
+  CompositeId loan_app_id = 1 [(kalix.field).id = true];
 }
 
 message ApproveCommand {
-  string loan_app_id = 1 [(kalix.field).id = true];
+  CompositeId loan_app_id = 1 [(kalix.field).id = true];
 }
 
 message DeclineCommand {
-  string loan_app_id = 1 [(kalix.field).id = true];
+  CompositeId loan_app_id = 1 [(kalix.field).id = true];
+  string reason = 2;
 }
 
 service LoanAppService {
